@@ -1,0 +1,16 @@
+repository_type: pipeline
+
+nf_core_version: 4.1.0
+
+lint: {}
+
+template:
+  org: nf-core
+  name: sitedetect
+  description: this pipeline identifies the LTR based transgene integration from PCR
+    based targeted capture and ONT sequencing data
+  author: Akshay Dinesh
+  version: 1.0.0dev
+  force: true
+  outdir: .
+  is_nfcore: true
