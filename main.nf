@@ -18,7 +18,6 @@
 include { SITEDETECT  } from './workflows/sitedetect'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_sitedetect_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_sitedetect_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_sitedetect_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,10 +25,6 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_site
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,6 +47,9 @@ workflow NFCORE_SITEDETECT {
     //
     SITEDETECT (
         samplesheet,
+        params.genome,
+        params.primer,
+        params.cassette,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,

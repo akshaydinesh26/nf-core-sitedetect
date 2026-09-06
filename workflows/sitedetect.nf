@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
+include { NANOPLOT               } from '../modules/nf-core/nanoplot/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -20,6 +20,9 @@ workflow SITEDETECT {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+    genome
+    primer
+    cassette
     multiqc_config
     multiqc_logo
     multiqc_methods_description
@@ -30,10 +33,10 @@ workflow SITEDETECT {
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
     //
-    // MODULE: Run FastQC
+    // MODULE: Run Nanoplot QC
     //
-    FASTQC(ch_samplesheet)
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
+    NANOPLOT(ch_samplesheet)
+    ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT.out.txt.map{ _meta, file -> file })
 
     //
     // Collate and save software versions
