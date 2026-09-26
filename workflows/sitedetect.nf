@@ -7,6 +7,9 @@ include { NANOPLOT as NANOPLOT_RAW              } from '../modules/nf-core/nanop
 include { NANOPLOT as NANOPLOT_TRIMMED          } from '../modules/nf-core/nanoplot/main'
 include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
 include { CUTADAPT                              } from '../modules/nf-core/cutadapt/main'
+include { BWA_INDEX                             } from '../modules/nf-core/bwa/index/main'
+include { BWA_MEM                               } from '../modules/nf-core/bwa/mem/main'
+include { COMBINEFASTA                          } from '../modules/local/combinefasta/main'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -38,13 +41,29 @@ workflow SITEDETECT {
     // MODULE: Run Nanoplot QC
     //
     NANOPLOT_RAW(ch_samplesheet)
-    // MODULE : Run cut adapt to remove casette if present
+    //
+    // MODULE : Run cutadapt to remove casette if present
+    //
     if (cassette) {
         ch_cassette_trimmed = CUTADAPT(ch_samplesheet)
         NANOPLOT_TRIMMED(ch_cassette_trimmed)
     } else {
         ch_cassette_trimmed = ch_samplesheet
     }
+    //
+    // module combine genome and primer 
+    //
+    COMBINEFASTA(genome,primer)
+    //
+    // MODULE create bwa index
+    //
+    ch_index_input = COMBINEFASTA.out.index_fasta ? COMBINEFASTA.out.index_fasta.map { fasta -> [[id: fasta.baseName], fasta] }.collect() : channel.empty()
+    BWA_INDEX(ch_index_input)
+    //
+    // MODULE align reads bwa
+    //
+    sort_bam = true // alignments will be sorted
+    BWA_MEM(ch_cassette_trimmed, BWA_INDEX.out.index, ch_index_input, sort_bam)
 
     ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_RAW.out.txt.map{ _meta, file -> file })
     if (params.cassette) {
