@@ -3,12 +3,14 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { NANOPLOT               } from '../modules/nf-core/nanoplot/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_sitedetect_pipeline'
+include { NANOPLOT as NANOPLOT_RAW              } from '../modules/nf-core/nanoplot/main'
+include { NANOPLOT as NANOPLOT_TRIMMED          } from '../modules/nf-core/nanoplot/main'
+include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
+include { CUTADAPT                              } from '../modules/nf-core/cutadapt/main'
+include { paramsSummaryMap                      } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_sitedetect_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,9 +37,19 @@ workflow SITEDETECT {
     //
     // MODULE: Run Nanoplot QC
     //
-    NANOPLOT(ch_samplesheet)
-    ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT.out.txt.map{ _meta, file -> file })
+    NANOPLOT_RAW(ch_samplesheet)
+    // MODULE : Run cut adapt to remove casette if present
+    if (cassette) {
+        ch_cassette_trimmed = CUTADAPT(ch_samplesheet)
+        NANOPLOT_TRIMMED(ch_cassette_trimmed)
+    } else {
+        ch_cassette_trimmed = ch_samplesheet
+    }
 
+    ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_RAW.out.txt.map{ _meta, file -> file })
+    if (params.cassette) {
+        ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_TRIMMED.out.txt.map { _meta, file -> file })
+    }
     //
     // Collate and save software versions
     //

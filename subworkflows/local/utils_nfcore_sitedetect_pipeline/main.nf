@@ -112,7 +112,10 @@ workflow PIPELINE_INITIALISATION {
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
             meta, ont_reads ->
-                return [ meta.id, meta + [ platform:'ont' ], [ ont_reads ] ]
+                return [ meta.id, 
+                meta + 
+                [ platform  :'ont',
+                  single_end: true ], [ ont_reads ] ]
         }
         .groupTuple()
         .map { samplesheet ->
