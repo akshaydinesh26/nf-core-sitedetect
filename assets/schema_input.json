@@ -18,7 +18,7 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file from ONT, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "errorMessage": "ONT FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             }
         },
         "required": ["sample", "ont_reads"]

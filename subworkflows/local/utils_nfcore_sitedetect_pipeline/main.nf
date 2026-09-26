@@ -109,15 +109,20 @@ workflow PIPELINE_INITIALISATION {
     //
 
     channel
-    .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
-    .map {
-        meta, ont_reads ->
-            [
-                meta + [platform: 'ont'],
-                ont_reads
-            ]
-    }
-    .set { ch_samplesheet }
+        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
+        .map {
+            meta, ont_reads ->
+                return [ meta.id, meta + [ platform:'ont' ], [ ont_reads ] ]
+        }
+        .groupTuple()
+        .map { samplesheet ->
+            validateInputSamplesheet(samplesheet)
+        }
+        .map {
+            meta, fastqs ->
+                return [ meta, fastqs.flatten() ]
+        }
+        .set { ch_samplesheet }
 
     emit:
     samplesheet = ch_samplesheet
@@ -178,12 +183,24 @@ workflow PIPELINE_COMPLETION {
 // Check and validate pipeline parameters
 //
 def validateInputParameters() {
-    if (!params.genome) {
-        error("Please provide --genome")
-    }
+    genomeExistsError()
+}
 
-    if (!params.primer) {
-        error("Please provide --primer")
+//
+// Validate channels from input samplesheet
+//
+def validateInputSamplesheet(input) {
+    def (metas, ont_file) = input[1..2]
+    return [ metas[0], ont_file ]
+}
+//
+// Get attribute from genome config file e.g. fasta
+//
+def getGenomeAttribute(attribute) {
+    if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
+        if (params.genomes[ params.genome ].containsKey(attribute)) {
+            return params.genomes[ params.genome ][ attribute ]
+        }
     }
 
     if (params.cassette && !(params.cassette ==~ /^[ACGTNacgtn]+$/)) {

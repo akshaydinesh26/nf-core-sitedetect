@@ -22,24 +22,23 @@ The `sample` identifiers have to be the same when you have re-sequenced the same
 
 ```csv title="samplesheet.csv"
 sample,ont_reads
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz
+SAMPLE,/path/to/fastq/files/AEG588A1_001.fastq.gz
 ```
 
 ### Full samplesheet
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 2 columns to match those defined in the table below.
 
 ```csv title="samplesheet.csv"
 sample,ont_reads
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz
+SAMPLE,/path/to/fastq/files/AEG588A1_001.fastq.gz
 ```
 
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `ont_reads` | Full path to FastQ file for ONT reads. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| `ont_path` | Full path to FastQ file for ONT long reads. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
