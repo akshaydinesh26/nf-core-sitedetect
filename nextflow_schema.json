@@ -67,6 +67,16 @@
                     "pattern": "^[ACGTNacgtn]+$",
                     "help_text": "Optional nucleotide sequence associated with the transgene cassette.",
                     "fa_icon":  "fas fa-file-code"
+                },
+                "jsa_distance": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Distance used by japsa flankdetect."
+                },
+                "jsa_qual": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Minimum quality threshold for japsa flankdetect."
                 }
             }
         },

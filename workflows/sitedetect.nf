@@ -9,7 +9,10 @@ include { MULTIQC                               } from '../modules/nf-core/multi
 include { CUTADAPT                              } from '../modules/nf-core/cutadapt/main'
 include { BWA_INDEX                             } from '../modules/nf-core/bwa/index/main'
 include { BWA_MEM                               } from '../modules/nf-core/bwa/mem/main'
+include { BEDTOOLS_SORT                         } from '../modules/nf-core/bedtools/sort/main'
+include { BEDTOOLS_MERGE                         } from '../modules/nf-core/bedtools/merge/main'
 include { COMBINEFASTA                          } from '../modules/local/combinefasta/main'
+include { FLANKDETECT                           } from '../modules/local/flankdetect/main'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -64,7 +67,15 @@ workflow SITEDETECT {
     //
     sort_bam = true // alignments will be sorted
     BWA_MEM(ch_cassette_trimmed, BWA_INDEX.out.index, ch_index_input, sort_bam)
-
+    //
+    // MODULE JAPSA FLANKDETECT
+    //
+    FLANKDETECT(BWA_MEM.out.sam, genome)
+    //
+    // bedtools processing sort and merge
+    //
+    BEDTOOLS_SORT(FLANKDETECT.out.clustered_sites)
+    BEDTOOLS_MERGE(BEDTOOLS_SORT.out.sorted)
     ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_RAW.out.txt.map{ _meta, file -> file })
     if (params.cassette) {
         ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT_TRIMMED.out.txt.map { _meta, file -> file })
